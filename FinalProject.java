@@ -1,7 +1,7 @@
 /*
  * IAT 455 - Final Project
  * James Yoo: 301341943
- * Chelsea Irwawin Jennifer: 301####
+ * Chelsea Irwawin Jennifer: 301384826
  */
 
 import java.awt.Color;
