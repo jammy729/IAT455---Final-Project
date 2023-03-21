@@ -9,16 +9,16 @@ public class Patch {
 		this.image = originalInput;
 		this.width = width;
 		this.height = height;
-		setCorners(x,y);
+		setCorner(x,y);
 	}
 	
 	
 	
-	protected void setCorners(int x, int y) {
+	protected void setCorner(int x, int y) {
 		if(x + width > image.getWidth() | y + height > image.getHeight() | x < 0 | y < 0) {
 			return;
 		}
-		setCorners(x, y);
+		setCorner(x, y);
 	}
 	
 	
