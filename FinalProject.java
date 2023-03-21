@@ -1,99 +1,85 @@
 
-//IAT455 Final Project
 /*
+ * IAT 455 - Final Project
  * James Yoo: 301341943
  * Chelsea Irwawin Jennifer: 301####
  */
-//**********************************************************/
+
 import java.awt.Color;
-import java.awt.Font;
 import java.awt.Frame;
 import java.awt.Graphics;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 
 import javax.imageio.ImageIO;
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
-@SuppressWarnings("serial")
-class FinalProject extends Frame { // controlling class
-	BufferedImage impressionistImage; // reference to an Image object
-	BufferedImage quiltingImage; // mask for the painted areas
-	BufferedImage originalImage;
-	BufferedImage resultImage;
+class FinalProject extends Frame {
+	private static final long serialVersionUID = 1L;
 
-	int width; // width of the resized image
-	int height; // height of the resized image
+	// image
+	BufferedImage image;
+	BufferedImage texturedImage;
+	BufferedImage quilting;
+
+	// size
+	int width;
+	int height;
+
+	// screen size
+	GraphicsDevice screenSize = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+	int screenWidth = screenSize.getDisplayMode().getWidth();
+	int screenHeight = screenSize.getDisplayMode().getHeight();
+
+	// debug mode
+	boolean debugMode = true;
 
 	public FinalProject() {
-		// constructor
-		// Get an image from the specified file in the current directory on the
-		// local hard disk.
+		loadImages();
+		texturedImage = impressionistEffect(image, 2);
+		this.setTitle("Final Project - Impressionist Effect with Image Quilting technique");
+		this.setVisible(true);
+		this.addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				System.exit(0);
+			}
+		});
+	}
+
+	/*
+	 * test mode - load default image from the local file !test mode - user can
+	 * choose the image
+	 */
+	private void loadImages() {
 		try {
-			originalImage = ImageIO.read(new File("car_cg.jpg")); // 1
-			quiltingImage = ImageIO.read(new File("painted_areas_mask.jpg")); // 2
+			if (debugMode) {
+				System.out.println("Debug Mode On");
+				image = ImageIO.read(new File("testImage.jpg"));
+			} else {
+				System.out.println("Debug Mode off");
+				JFileChooser chooser = new JFileChooser();
+				// allow png, jpg
+				FileNameExtensionFilter filter = new FileNameExtensionFilter("Images", "jpg", "png");
+				chooser.setFileFilter(filter);
+				int returnVal = chooser.showOpenDialog(null);
+				if (returnVal == JFileChooser.APPROVE_OPTION) {
+					image = ImageIO.read(chooser.getSelectedFile());
+				}
+			}
+			width = image.getWidth();
+			height = image.getHeight();
 
 		} catch (Exception e) {
 			System.out.println("Cannot load the provided image");
 		}
-		this.setTitle("Week 8 workshop");
-		this.setVisible(true);
-
-		width = originalImage.getWidth();//
-		height = originalImage.getHeight();//
-
-		// For images 5 to 12 you should replace the carImage with the proper methods
-		// that perform the requested task
-
-		// 5 Adding shadows to car
-		impressionistImage = impressionistEffect(originalImage);
-		quiltingImage = quiltingEffect(impressionistImage);
-
-		// Anonymous inner-class listener to terminate program
-		this.addWindowListener(new WindowAdapter() {// anonymous class definition
-			public void windowClosing(WindowEvent e) {
-				System.exit(0);// terminate the program
-			}// end windowClosing()
-		}// end WindowAdapter
-		);// end addWindowListener
-	}// end constructor
-
-	public BufferedImage impressionistEffect(BufferedImage src) {
-		BufferedImage result = new BufferedImage(src.getWidth(), src.getHeight(), src.getType());
-
-		int width = src.getWidth();
-		int height = src.getHeight();
-
-		// apply the operation to each pixel
-		for (int i = 0; i < width; i++) {
-			for (int j = 0; j < height; j++) {
-				int rgb = src.getRGB(i, j);
-				int newR, newG, newB;
-
-				newR = getRed(rgb);
-				newG = getGreen(rgb);
-				newB = getBlue(rgb);
-
-				// Decompose the image into a set of layers using Laplacian pyramid
-				// decomposition
-				// TODO: Implement Laplacian pyramid decomposition
-
-				// Generate brushstrokes for each layer
-				// TODO: Implement brushstroke generation
-
-				// Mix the colors of the brushstrokes to create the final image
-				// TODO: Implement color mixing
-
-				rgb = new Color(newR, newG, newB).getRGB();
-				result.setRGB(i, j, rgb);
-
-			}
-		}
-		return result;
 	}
 
-	public BufferedImage quiltingEffect(BufferedImage src) {
+	public BufferedImage impressionistEffect(BufferedImage src, int factor) {
 		BufferedImage result = new BufferedImage(src.getWidth(), src.getHeight(), src.getType());
 
 		int width = src.getWidth();
@@ -105,10 +91,9 @@ class FinalProject extends Frame { // controlling class
 				int rgb = src.getRGB(i, j);
 				int newR, newG, newB;
 
-				// don't need to Math.abs as its 255 - n
-				newR = (255 - getRed(rgb));
-				newG = (255 - getGreen(rgb));
-				newB = (255 - getBlue(rgb));
+				newR = clip(getRed(rgb) * factor);
+				newG = clip(getGreen(rgb) * factor);
+				newB = clip(getBlue(rgb) * factor);
 
 				rgb = new Color(newR, newG, newB).getRGB();
 				result.setRGB(i, j, rgb);
@@ -137,32 +122,20 @@ class FinalProject extends Frame { // controlling class
 	}
 
 	public void paint(Graphics g) {
-		int w = width / 5;
-		int h = height / 5;
 
-		this.setSize(w * 5 + 100, h * 4 + 50);
+		int w = screenWidth;
+		int h = screenHeight;
 
-		g.drawImage(originalImage, 25, 50, w, h, this);
-		g.drawImage(impressionistImage, 100 + w, 50, w, h, this);
-		g.drawImage(quiltingImage, 125 + w, 50, w, h, this);
-		g.drawImage(resultImage, 150 + w, 50, w, h, this);
-
-		g.setColor(Color.BLACK);
-		Font f1 = new Font("Verdana", Font.PLAIN, 13);
-		g.setFont(f1);
-
-		g.drawString("1.Original Image", 25, 40);
-		g.drawString("2.Original img + Impressionist", 125 + w, 40);
-		g.drawString("3.Impressionist img + quilting", 225 + w * 2, 40);
+		this.setSize(w, h);
+		// resize by dividing the image width and height by multiplying a factor of 0.4
+		g.drawImage(image, 0 + 10, 10, (int) (w * 0.5 - 10), (int) (h * 0.5 - 10), this);
+		g.drawImage(texturedImage, 0 + 10, h / 2 + 10, w / 2 - 10, (int) (h * 0.5 - 10), this);
 
 	}
-	// =======================================================//
 
 	public static void main(String[] args) {
+		FinalProject img = new FinalProject();
+		img.repaint();
 
-		FinalProject img = new FinalProject();// instantiate this object
-		img.repaint();// render the image
-
-	}// end main
+	}
 }
-//=======================================================//
