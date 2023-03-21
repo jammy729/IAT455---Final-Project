@@ -1,4 +1,3 @@
-
 /*
  * IAT 455 - Final Project
  * James Yoo: 301341943
@@ -14,28 +13,23 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
-
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 class FinalProject extends Frame {
 	private static final long serialVersionUID = 1L;
-
 	// image
 	BufferedImage image;
 	BufferedImage texturedImage;
 	BufferedImage quilting;
-
 	// size
 	int width;
 	int height;
-
 	// screen size
 	GraphicsDevice screenSize = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
 	int screenWidth = screenSize.getDisplayMode().getWidth();
 	int screenHeight = screenSize.getDisplayMode().getHeight();
-
 	// debug mode
 	boolean debugMode = true;
 
@@ -128,9 +122,8 @@ class FinalProject extends Frame {
 
 		this.setSize(w, h);
 		// resize by dividing the image width and height by multiplying a factor of 0.4
-		g.drawImage(image, 0 + 10, 10, (int) (w * 0.5 - 10), (int) (h * 0.5 - 10), this);
-		g.drawImage(texturedImage, 0 + 10, h / 2 + 10, w / 2 - 10, (int) (h * 0.5 - 10), this);
-
+		g.drawImage(image, 10, 10, w / 2 - 10, h / 2 - 10, this);
+		g.drawImage(texturedImage, 10, w / 2 + 10, w / 2 - 10, h / 2 - 10, this);
 	}
 
 	public static void main(String[] args) {
