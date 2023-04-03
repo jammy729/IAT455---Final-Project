@@ -37,21 +37,24 @@ class FinalProject extends Frame {
 	// debug mode
 	boolean debugMode = true;
 
-	int minAllowedPixelInterval = 1; // minimum allowed pixels between strokes
-	int maxAllowedPixelInterval = 10; // maximum allowed pixels between strokes
-	int minAllowedStrokeRadius = 1; // minimum allowed stroke radius
-	int maxAllowedStrokeRadius = 16; // maximum allowed stroke radius
-	int minAllowedStrokeLength = 1; // minimum allowed stroke length
-	int maxAllowedStrokeLength = 20; // maximum allowed stroke length
-	int minAllowedStrokeAngle = 0; // minimum allowed stroke angle
-	int maxAllowedStrokeAngle = 360; // maximum allowed stroke angle
+	// slider min and max
+	int minAllowedPixelInterval = 1;
+	int maxAllowedPixelInterval = 10;
+	int minAllowedStrokeRadius = 1;
+	int maxAllowedStrokeRadius = 5;
+	int minAllowedStrokeLength = 4;
+	int maxAllowedStrokeLength = 20;
+	int minAllowedStrokeAngle = 0;
+	int maxAllowedStrokeAngle = 360;
 
+	// default slider value
 	int minStrokeRadius = 1;
-	int maxStrokeRadius = 12;
+	int maxStrokeRadius = 5;
 	int minStrokeLength = 4;
 	int maxStrokeLength = 20;
-	int minStrokeAngle = 30;
-	int pixelInterval = 10;
+	int pixelInterval = 3;
+	int minStrokeAngle = 30; // minimum stroke angle (if isOrientationByGradient is false)
+	int maxStrokeAngle = 60; // maximum stroke angle (if isOrientationByGradient is false)
 
 	public FinalProject() {
 		loadImages();
@@ -71,12 +74,12 @@ class FinalProject extends Frame {
 			if (!debugMode) {
 				System.out.println("Debug Mode off");
 				JFileChooser chooser = new JFileChooser();
-				// allow png, jpg
-				FileNameExtensionFilter filter = new FileNameExtensionFilter("Images", "jpg", "png");
-				chooser.setFileFilter(filter);
+				chooser.setFileFilter(new FileNameExtensionFilter("Images", "jpg", "png"));
 				int returnVal = chooser.showOpenDialog(null);
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
 					image = ImageIO.read(chooser.getSelectedFile());
+				} else {
+					return;
 				}
 
 			} else {
@@ -101,23 +104,20 @@ class FinalProject extends Frame {
 
 		final ArrayList<Line> lines = new ArrayList<Line>();
 
-		double angleInDegrees;
-		float angle;
-
 		for (int i = 0; i < width; i = i + pixelInterval) {
 			for (int j = 0; j < height; j = j + pixelInterval) {
 				try {
-					final double length = util.randomDoubleBetween(minStrokeLength, maxStrokeLength);
+					double randomStrokeLength = util.randomDoubleBetween(minStrokeLength, maxStrokeLength);
 
-					angleInDegrees = util.getOrientationForPixel(src, i, j);
-					angle = (float) Math.toRadians(angleInDegrees);
+					double angleInDegrees = util.getOrientationForPixel(src, i, j);
+					float angle = (float) Math.toRadians(angleInDegrees);
 
-					final int endX = (int) (i + length * Math.sin(angle));
-					final int endY = (int) (j + length * Math.cos(angle));
+					int endPointX = (int) (i + randomStrokeLength * Math.sin(angle));
+					int endPointY = (int) (j + randomStrokeLength * Math.cos(angle));
 
 					Color color = new Color(image.getRGB(i, j));
 
-					lines.add(new Line(i, j, endX, endY, color));
+					lines.add(new Line(i, j, endPointX, endPointY, color));
 				} catch (final Exception e) {
 					System.out.println(e);
 				}
@@ -128,31 +128,26 @@ class FinalProject extends Frame {
 
 	private void drawLines(final ArrayList<Line> lines, final Graphics g) {
 		final Graphics2D g2 = (Graphics2D) g;
-		for (final Line line : lines) {
+		for (Line line : lines) {
 			final int strokeRadius = (int) util.randomDoubleBetween(minStrokeRadius, maxStrokeRadius);
 			final Stroke stroke = new BasicStroke(strokeRadius, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
-			final int x1 = line.x1;
-			final int y1 = line.y1;
-			final int x2 = line.x2;
-			final int y2 = line.y2;
 			g2.setColor(line.color);
 			g2.setStroke(stroke);
-			g2.drawLine(x1, y1, x2, y2);
+			g2.drawLine(line.x1, line.y1, line.x2, line.y2);
 		}
 	}
 
 	public void setRange(Parameter param, int min, int max) {
 		switch (param) {
-		case radius:
-			this.minStrokeRadius = min;
-			this.maxStrokeRadius = max;
-			break;
-		case length:
-			this.minStrokeLength = min;
-			this.maxStrokeLength = max;
-			break;
-		default:
-			break;
+		case radius -> {
+			minStrokeRadius = min;
+			maxStrokeRadius = max;
+		}
+		case length -> {
+			minStrokeLength = min;
+			maxStrokeLength = max;
+		}
+		default -> throw new IllegalArgumentException("Invalid parameter: " + param);
 		}
 		repaint();
 	}
@@ -161,7 +156,7 @@ class FinalProject extends Frame {
 		final ArrayList<Line> lines = generateStrokes(image);
 		Util.shuffle(lines);
 		drawLines(lines, g);
-		this.setSize(width, height);
+		setSize(width, height);
 	}
 
 	public static void main(String[] args) {

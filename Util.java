@@ -3,9 +3,9 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Util {
-	Random random = new Random();
 
 	/**
 	 * Generate a random double between min and max
@@ -15,7 +15,8 @@ public class Util {
 	 * @return: random double value between min and max
 	 */
 	public double randomDoubleBetween(double min, double max) {
-		return random.nextDouble() * (max - min) + min;
+		Random random = new Random();
+		return ThreadLocalRandom.current().nextDouble(min, max);
 	}
 
 	/**

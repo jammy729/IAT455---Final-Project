@@ -190,12 +190,12 @@ public class RangeSliderWindow extends JPanel implements ActionListener, ChangeL
 	public void actionPerformed(ActionEvent event) {
 		JButton clickedButton = (JButton) event.getSource();
 		if (clickedButton == applyBtn) {
-			apply();
+			btn();
 		}
 	}
 
 	/** Apply the slider values to the finalProject class. */
-	private void apply() {
+	private void btn() {
 		finalProject.pixelInterval = pixelIntervalSlider.getValue();
 		finalProject.setRange(Parameter.radius, radiusSlider.getValue(), radiusSlider.getUpperValue());
 		finalProject.setRange(Parameter.length, lengthSlider.getValue(), lengthSlider.getUpperValue());
