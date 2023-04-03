@@ -9,6 +9,7 @@
 /Operations$1.class
 /Operations$2.class
 /Operations$3.class
+<<<<<<< Updated upstream
 /getColor.class
 /GetColors.class
 /Utilities.class
@@ -31,4 +32,11 @@
 /UIControlWindow.class
 /Parameter.class
 /FinalProject$1Range.class
+<<<<<<< HEAD
 /BrushStroke.class
+=======
+=======
+/SynthAide.class
+/MinPathFinder.class
+>>>>>>> Stashed changes
+>>>>>>> 7d375d15f7734d1a78d69e39fcc0b6c1b455e3a1

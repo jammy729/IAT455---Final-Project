@@ -1,8 +1,9 @@
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 
 public class View {
 	protected BufferedImage image;
-	protected int x, y;
+	protected int xOffset, yOffset;
 	
 	public View(BufferedImage image, int x, int y) {
 		this.image = image;
@@ -11,18 +12,18 @@ public class View {
 	
 //	moving the view to the specified position
 	protected void setCorner(int x, int y) {
-		this.x = x;
-		this.y = y;
+		this.xOffset = x;
+		this.yOffset = y;
 	}
 	
 //	X coordinate of the upper left corner of the image
 	protected int getCornerX() {
-		return x;
+		return xOffset;
 	}
 	
 // Y coordinate of the upper left corner of the image
 	protected int getCornerY() {
-		return y;
+		return yOffset;
 	}
 	
 //	Checking if the coordinate is on the left corner of the image
@@ -37,25 +38,43 @@ public class View {
 	
 //	Checking the bounds and taking the color value from the pixel if it is within bounds.
 	protected int[] getSample (int x, int y) {
-		int width = image.getWidth();
-		int height = image.getHeight();
-		int[] output = new int[3];
+		int[] out = new int[3];
+		int r,g,b;
+		int rgb = image.getRGB(x, y);
 		
-		for(int i = 0; i < width ; i++) {
-			for(int j = 0; j < height; j++) {
-				int r,g,b;
-				int rgb = image.getRGB(i, j);
-				
-				r = getRed(rgb);
-				g = getGreen(rgb);
-				b = getBlue(rgb);
-				
-				output [1] = r;
-				output [2] = g;
-				output [3] = b;
-			}
-		}
-		return output;
+		r = getRed(rgb);
+		g = getGreen(rgb);
+		b = getBlue(rgb);
+		
+		out[1] = r;
+		out[2] = g;
+		out[3] = b;
+		
+		
+		return out;		
+	}
+	
+	protected void putSample(int x, int y, int [] newvals) {
+		int r, g, b;
+		newvals = getSample(x, y);
+		r = newvals[1];
+		g = newvals[2];
+		b = newvals[3];
+		
+		int rgb = new Color(r, g, b).getRGB();
+		image.setRGB(x, y, rgb);
+	}
+	
+	protected int imageX(int x) {
+		return x + xOffset;
+	}
+	
+	protected int imageY(int y) {
+		return y + yOffset;
+	}
+	
+	protected BufferedImage getImage() {
+		return image;
 	}
 	
 	private int clip(int v) {

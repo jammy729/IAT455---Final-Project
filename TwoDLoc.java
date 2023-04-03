@@ -19,4 +19,12 @@ public class TwoDLoc {
 	protected int getCol() {
 		return col;
 	}
+	
+	protected int getX() {
+		return row;
+	}
+	
+	protected int getY() {
+		return col;
+	}
 }
