@@ -32,8 +32,12 @@
 /UIControlWindow.class
 /Parameter.class
 /FinalProject$1Range.class
+<<<<<<< HEAD
+/BrushStroke.class
+=======
 =======
 /SynthAide.class
 /MinPathFinder.class
 >>>>>>> Stashed changes
-/ImageQuilter.class
+>>>>>>> 7d375d15f7734d1a78d69e39fcc0b6c1b455e3a1
+/loadImage.class

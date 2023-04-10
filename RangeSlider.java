@@ -1,3 +1,9 @@
+
+/**
+ * Ernie Yu - Github
+ * 
+ */
+
 import javax.swing.JSlider;
 
 /**

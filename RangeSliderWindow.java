@@ -1,10 +1,18 @@
+
+/**
+ * Ernie Yu - Github
+ * 
+ */
 import java.awt.BorderLayout;
+import java.awt.Checkbox;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -16,15 +24,20 @@ import javax.swing.border.Border;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-public class RangeSliderWindow extends JPanel implements ActionListener, ChangeListener {
+public class RangeSliderWindow extends JPanel implements ActionListener, ChangeListener, ItemListener {
 	private static final long serialVersionUID = 1L;
-	private FinalProject finalProject; // reference to the finalProject
-	private RangeSlider radius_slider = new RangeSlider(); // double-input slider to control stroke radius
-	private RangeSlider length_slider = new RangeSlider(); // double-input slider to control stroke length
 
+	private FinalProject finalProject;
+	// MIN-MAX RANGE SLIDER
+	private RangeSlider radius_slider = new RangeSlider();
+	private RangeSlider length_slider = new RangeSlider();
+	// TICK MARK SLIDER
 	private JSlider pixel_gap_slider; // single-input slider to control pixel interval
+	private JSlider angle_slider; // single-input slider to control pixel interval
+	// CHECKBOX
+	private Checkbox angle_option = new Checkbox("Set angle", true);
 
-	// labels for sliders and values
+	// TITLE AND LABEL
 	private JLabel radius_slider_title = new JLabel();
 	private JLabel radius_slider_label_min = new JLabel();
 	private JLabel radius_slider_value_min = new JLabel();
@@ -38,7 +51,9 @@ public class RangeSliderWindow extends JPanel implements ActionListener, ChangeL
 	private JLabel length_slider_value_max = new JLabel();
 
 	private JLabel pixel_gap_sliderTitle = new JLabel();
-	private JButton applyBtn = new JButton("Apply"); // apply the current parameters
+	private JLabel angle_sliderTitle = new JLabel();
+
+	private JButton generate = new JButton(); // apply the current parameters
 
 	/**
 	 * Create the UI control window.
@@ -53,13 +68,18 @@ public class RangeSliderWindow extends JPanel implements ActionListener, ChangeL
 		this.finalProject = finalProject;
 
 		// JSlider(orientation,mixValue, maxValue, value);
-		pixel_gap_slider = new JSlider(JSlider.HORIZONTAL, finalProject.min_slider_interval,
-				finalProject.max_slider_interval, finalProject.pixel_gap);
+		pixel_gap_slider = new JSlider(JSlider.HORIZONTAL, finalProject.min_slider_pixel, finalProject.max_slider_pixel,
+				finalProject.pixel_gap);
+		angle_slider = new JSlider(JSlider.HORIZONTAL, finalProject.min_slider_theta, finalProject.max_slider_theta,
+				finalProject.theta);
 
 		//
 		pixel_gap_slider.addChangeListener(this);
+		angle_slider.addChangeListener(this);
+
 		length_slider.addChangeListener(this);
 		radius_slider.addChangeListener(this);
+		angle_option.addItemListener(this);
 
 		// pixel gap
 		/*
@@ -67,10 +87,17 @@ public class RangeSliderWindow extends JPanel implements ActionListener, ChangeL
 		 */
 		pixel_gap_sliderTitle.setText("Pixel Gap/Increment");
 		pixel_gap_slider.setPreferredSize(new Dimension(240, 40));
-		pixel_gap_slider.setMajorTickSpacing(1);
+		pixel_gap_slider.setMajorTickSpacing(2);
 		pixel_gap_slider.setPaintTicks(true);
 		pixel_gap_slider.setPaintLabels(true);
 		pixel_gap_slider.setSnapToTicks(true);
+
+		angle_sliderTitle.setText("Choose angle");
+		angle_slider.setPreferredSize(new Dimension(240, 40));
+		angle_slider.setMajorTickSpacing(55);
+		angle_slider.setPaintTicks(true);
+		angle_slider.setPaintLabels(true);
+		angle_slider.setSnapToTicks(true);
 
 		// radius slider
 
@@ -93,8 +120,10 @@ public class RangeSliderWindow extends JPanel implements ActionListener, ChangeL
 		length_slider_label_min.setText("Min value:");
 		length_slider_label_max.setText("Max value:");
 
+		generate.setText("Generate");
+
 		// Add action listeners to buttons
-		applyBtn.addActionListener(this);
+		generate.addActionListener(this);
 
 		add(pixel_gap_sliderTitle, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.NORTHWEST,
 				GridBagConstraints.NONE, new Insets(0, 0, 3, 3), 0, 0));
@@ -102,42 +131,51 @@ public class RangeSliderWindow extends JPanel implements ActionListener, ChangeL
 		add(pixel_gap_slider, new GridBagConstraints(0, 1, 2, 1, 0.0, 0.0, GridBagConstraints.NORTHWEST,
 				GridBagConstraints.NONE, new Insets(0, 0, 3, 3), 0, 0));
 
-		add(radius_slider_title, new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0, GridBagConstraints.NORTHWEST,
+		add(angle_option, new GridBagConstraints(0, 2, 2, 1, 0.0, 0.0, GridBagConstraints.NORTHWEST,
 				GridBagConstraints.NONE, new Insets(0, 0, 3, 3), 0, 0));
 
-		add(radius_slider_label_min, new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0, GridBagConstraints.NORTHWEST,
-				GridBagConstraints.NONE, new Insets(0, 0, 3, 3), 0, 0));
-		add(radius_slider_value_min, new GridBagConstraints(1, 3, 1, 1, 0.0, 0.0, GridBagConstraints.NORTHWEST,
+		add(angle_sliderTitle, new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0, GridBagConstraints.NORTHWEST,
 				GridBagConstraints.NONE, new Insets(0, 0, 3, 3), 0, 0));
 
-		add(radius_slider_label_max, new GridBagConstraints(0, 4, 1, 1, 0.0, 0.0, GridBagConstraints.NORTHWEST,
-				GridBagConstraints.NONE, new Insets(0, 0, 3, 3), 0, 0));
-		add(range_slider_value_max, new GridBagConstraints(1, 4, 1, 1, 0.0, 0.0, GridBagConstraints.NORTHWEST,
+		add(angle_slider, new GridBagConstraints(0, 4, 2, 1, 0.0, 0.0, GridBagConstraints.NORTHWEST,
 				GridBagConstraints.NONE, new Insets(0, 0, 3, 3), 0, 0));
 
-		add(radius_slider, new GridBagConstraints(0, 5, 2, 1, 0.0, 0.0, GridBagConstraints.NORTHWEST,
+		add(radius_slider_title, new GridBagConstraints(0, 5, 1, 1, 0.0, 0.0, GridBagConstraints.NORTHWEST,
 				GridBagConstraints.NONE, new Insets(0, 0, 3, 3), 0, 0));
 
-		add(length_slider_title, new GridBagConstraints(0, 6, 1, 1, 0.0, 0.0, GridBagConstraints.NORTHWEST,
+		add(radius_slider_label_min, new GridBagConstraints(0, 6, 1, 1, 0.0, 0.0, GridBagConstraints.NORTHWEST,
+				GridBagConstraints.NONE, new Insets(0, 0, 3, 3), 0, 0));
+		add(radius_slider_value_min, new GridBagConstraints(1, 6, 1, 1, 0.0, 0.0, GridBagConstraints.NORTHWEST,
 				GridBagConstraints.NONE, new Insets(0, 0, 3, 3), 0, 0));
 
-		add(length_slider_label_min, new GridBagConstraints(0, 7, 1, 1, 0.0, 0.0, GridBagConstraints.NORTHWEST,
+		add(radius_slider_label_max, new GridBagConstraints(0, 7, 1, 1, 0.0, 0.0, GridBagConstraints.NORTHWEST,
 				GridBagConstraints.NONE, new Insets(0, 0, 3, 3), 0, 0));
-		add(length_slider_value_min, new GridBagConstraints(1, 7, 1, 1, 0.0, 0.0, GridBagConstraints.NORTHWEST,
-				GridBagConstraints.NONE, new Insets(0, 0, 3, 3), 0, 0));
-
-		add(length_slider_label_max, new GridBagConstraints(0, 8, 1, 1, 0.0, 0.0, GridBagConstraints.NORTHWEST,
-				GridBagConstraints.NONE, new Insets(0, 0, 3, 3), 0, 0));
-		add(length_slider_value_max, new GridBagConstraints(1, 8, 1, 1, 0.0, 0.0, GridBagConstraints.NORTHWEST,
+		add(range_slider_value_max, new GridBagConstraints(1, 7, 1, 1, 0.0, 0.0, GridBagConstraints.NORTHWEST,
 				GridBagConstraints.NONE, new Insets(0, 0, 3, 3), 0, 0));
 
-		add(length_slider, new GridBagConstraints(0, 9, 2, 1, 0.0, 0.0, GridBagConstraints.NORTHWEST,
+		add(radius_slider, new GridBagConstraints(0, 8, 2, 1, 0.0, 0.0, GridBagConstraints.NORTHWEST,
+				GridBagConstraints.NONE, new Insets(0, 0, 3, 3), 0, 0));
+
+		add(length_slider_title, new GridBagConstraints(0, 9, 1, 1, 0.0, 0.0, GridBagConstraints.NORTHWEST,
+				GridBagConstraints.NONE, new Insets(0, 0, 3, 3), 0, 0));
+
+		add(length_slider_label_min, new GridBagConstraints(0, 10, 1, 1, 0.0, 0.0, GridBagConstraints.NORTHWEST,
+				GridBagConstraints.NONE, new Insets(0, 0, 3, 3), 0, 0));
+		add(length_slider_value_min, new GridBagConstraints(1, 10, 1, 1, 0.0, 0.0, GridBagConstraints.NORTHWEST,
+				GridBagConstraints.NONE, new Insets(0, 0, 3, 3), 0, 0));
+
+		add(length_slider_label_max, new GridBagConstraints(0, 11, 1, 1, 0.0, 0.0, GridBagConstraints.NORTHWEST,
+				GridBagConstraints.NONE, new Insets(0, 0, 3, 3), 0, 0));
+		add(length_slider_value_max, new GridBagConstraints(1, 11, 1, 1, 0.0, 0.0, GridBagConstraints.NORTHWEST,
+				GridBagConstraints.NONE, new Insets(0, 0, 3, 3), 0, 0));
+
+		add(length_slider, new GridBagConstraints(0, 12, 2, 1, 0.0, 0.0, GridBagConstraints.NORTHWEST,
 				GridBagConstraints.NONE, new Insets(0, 0, 3, 3), 0, 0));
 
 		/*
 		 * buttons
 		 */
-		add(applyBtn, new GridBagConstraints(0, 16, 2, 1, 0.0, 0.0, GridBagConstraints.NORTHWEST,
+		add(generate, new GridBagConstraints(0, 13, 2, 1, 0.0, 0.0, GridBagConstraints.NORTHWEST,
 				GridBagConstraints.NONE, new Insets(0, 0, 3, 3), 0, 0));
 	}
 
@@ -162,13 +200,16 @@ public class RangeSliderWindow extends JPanel implements ActionListener, ChangeL
 	 * @param event the event associated with the click
 	 */
 	public void actionPerformed(ActionEvent event) {
-		cta();
+		generate();
 	}
 
-	private void cta() {
+	private void generate() {
 		finalProject.pixel_gap = pixel_gap_slider.getValue();
+		finalProject.theta = (angle_slider.getValue());
+		System.out.println("Brigthness: " + finalProject.theta);
 		finalProject.min_max(Parameter.RADIUS, radius_slider.getValue(), radius_slider.getUpperValue());
 		finalProject.min_max(Parameter.LENGTH, length_slider.getValue(), length_slider.getUpperValue());
+		finalProject.SET_THETA = angle_option.getState();
 	}
 
 	public void sliderValue() {
@@ -193,6 +234,15 @@ public class RangeSliderWindow extends JPanel implements ActionListener, ChangeL
 	public void display() {
 		sliderValue();
 		setFrame();
+	}
+
+	@Override
+	public void itemStateChanged(ItemEvent e) {
+		// TODO Auto-generated method stub
+		Checkbox source = (Checkbox) e.getSource();
+		if (source == angle_option) {
+			System.out.println("Constant colour toggled");
+		}
 	}
 
 }
