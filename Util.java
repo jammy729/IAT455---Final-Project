@@ -69,30 +69,34 @@ public class Util {
 		int[][] surroundingPixels = new int[][] { { x - 1, y - 1 }, { x, y - 1 }, { x + 1, y - 1 }, { x - 1, y },
 				{ x + 1, y }, { x - 1, y + 1 }, { x, y + 1 }, { x + 1, y + 1 } };
 
-		// // set an initial lowest distance
+		// set an initial lowest distance
 		Color pixelColor = new Color(img.getRGB(x, y));
+		// ensures first comparison w any distance will always result in distance <
+		// lowestDistance
+
 		double lowestDistance = colorDistance(pixelColor,
 				new Color(img.getRGB(surroundingPixels[0][0], surroundingPixels[0][1])));
 		int closestPixelIndex = 0;
 
 		// for each one of the surrounding pixels,
 		for (int i = 1; i < surroundingPixels.length; i++) {
-			double distance = colorDistance(pixelColor,
-					new Color(img.getRGB(surroundingPixels[i][0], surroundingPixels[i][1])));
-			// if this pixel's distance is smaller than the current lowest distance...
+			int[] pixelPos = surroundingPixels[i];
+			Color color = new Color(img.getRGB(pixelPos[0], pixelPos[1]));
+			double distance = colorDistance(pixelColor, color);
+
 			if (distance < lowestDistance) {
 				lowestDistance = distance;
 				closestPixelIndex = i;
+
 			}
 		}
 		System.out.println(getAngle(closestPixelIndex));
 		return getAngle(closestPixelIndex);
-		// return closestPixelIndex;
 	}
 
 //	0, 45, 90, 135, 180, 225, 270, 315
-	public double getAngle(int index) {
-		switch (index) {
+	public double getAngle(int closestPixelIndex) {
+		switch (closestPixelIndex) {
 		case 0:
 			return 0;
 		case 1:
@@ -112,26 +116,6 @@ public class Util {
 		default:
 			return 0;
 		}
-
-//		case 0:
-//			return -135;
-//		case 1:
-//			return 180;
-//		case 2:
-//			return 135;
-//		case 3:
-//			return -90;
-//		case 4:
-//			return 90;
-//		case 5:
-//			return -45;
-//		case 6:
-//			return 0;
-//		case 7:
-//			return 45;
-//		default:
-//			return 0;
-//		}
 	}
 
 }
