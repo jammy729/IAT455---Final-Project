@@ -68,13 +68,14 @@ public class RangeSliderWindow extends JPanel implements ActionListener, ChangeL
 		this.finalProject = finalProject;
 
 		// JSlider(orientation,mixValue, maxValue, value);
-		pixel_gap_slider = new JSlider(JSlider.HORIZONTAL, finalProject.min_slider_pixel, finalProject.max_slider_pixel,
-				finalProject.pixel_gap);
+
+//		pixel_gap_slider = new JSlider(JSlider.HORIZONTAL, finalProject.min_slider_pixel, finalProject.max_slider_pixel,
+//				finalProject.pixel_gap);
 		angle_slider = new JSlider(JSlider.HORIZONTAL, finalProject.min_slider_theta, finalProject.max_slider_theta,
 				finalProject.theta);
 
 		//
-		pixel_gap_slider.addChangeListener(this);
+//		pixel_gap_slider.addChangeListener(this);
 		angle_slider.addChangeListener(this);
 
 		length_slider.addChangeListener(this);
@@ -85,16 +86,16 @@ public class RangeSliderWindow extends JPanel implements ActionListener, ChangeL
 		/*
 		 * keep this??
 		 */
-		pixel_gap_sliderTitle.setText("Pixel Gap/Increment");
-		pixel_gap_slider.setPreferredSize(new Dimension(240, 40));
-		pixel_gap_slider.setMajorTickSpacing(2);
-		pixel_gap_slider.setPaintTicks(true);
-		pixel_gap_slider.setPaintLabels(true);
-		pixel_gap_slider.setSnapToTicks(true);
+//		pixel_gap_sliderTitle.setText("Pixel Gap/Increment");
+//		pixel_gap_slider.setPreferredSize(new Dimension(240, 40));
+//		pixel_gap_slider.setMajorTickSpacing(1);
+//		pixel_gap_slider.setPaintTicks(true);
+//		pixel_gap_slider.setPaintLabels(true);
+//		pixel_gap_slider.setSnapToTicks(true);
 
 		angle_sliderTitle.setText("Choose angle");
 		angle_slider.setPreferredSize(new Dimension(240, 40));
-		angle_slider.setMajorTickSpacing(55);
+		angle_slider.setMajorTickSpacing(45);
 		angle_slider.setPaintTicks(true);
 		angle_slider.setPaintLabels(true);
 		angle_slider.setSnapToTicks(true);
@@ -125,11 +126,11 @@ public class RangeSliderWindow extends JPanel implements ActionListener, ChangeL
 		// Add action listeners to buttons
 		generate.addActionListener(this);
 
-		add(pixel_gap_sliderTitle, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.NORTHWEST,
-				GridBagConstraints.NONE, new Insets(0, 0, 3, 3), 0, 0));
-
-		add(pixel_gap_slider, new GridBagConstraints(0, 1, 2, 1, 0.0, 0.0, GridBagConstraints.NORTHWEST,
-				GridBagConstraints.NONE, new Insets(0, 0, 3, 3), 0, 0));
+//		add(pixel_gap_sliderTitle, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.NORTHWEST,
+//				GridBagConstraints.NONE, new Insets(0, 0, 3, 3), 0, 0));
+//
+//		add(pixel_gap_slider, new GridBagConstraints(0, 1, 2, 1, 0.0, 0.0, GridBagConstraints.NORTHWEST,
+//				GridBagConstraints.NONE, new Insets(0, 0, 3, 3), 0, 0));
 
 		add(angle_option, new GridBagConstraints(0, 2, 2, 1, 0.0, 0.0, GridBagConstraints.NORTHWEST,
 				GridBagConstraints.NONE, new Insets(0, 0, 3, 3), 0, 0));
@@ -204,7 +205,7 @@ public class RangeSliderWindow extends JPanel implements ActionListener, ChangeL
 	}
 
 	private void generate() {
-		finalProject.pixel_gap = pixel_gap_slider.getValue();
+//		finalProject.pixel_gap = pixel_gap_slider.getValue();
 		finalProject.theta = (angle_slider.getValue());
 		System.out.println("Brigthness: " + finalProject.theta);
 		finalProject.min_max(Parameter.RADIUS, radius_slider.getValue(), radius_slider.getUpperValue());

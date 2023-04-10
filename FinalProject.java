@@ -23,9 +23,14 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
  * 
- * put it in a different file??
- *
+ * @author jamesyoo
+ * 
+ * 
  */
+
+// TODO: 1. BRUSH RADII [1.5, 2.0] 
+// TODO: 2. BRUSH LENGTH IN THE RANGE [4, 10]
+// TODO: 3. HAVE CONSTRAINTS TO PREVENT LARGE BRUSH STROKES DOMINATING THE IMAGE
 enum Parameter {
 	RADIUS, LENGTH, ANGLE
 }
@@ -47,17 +52,17 @@ public class FinalProject extends Frame {
 	boolean SET_THETA = true;
 
 	// SLIDER MIN AND MAX
-	int min_slider_pixel = 4;
+	int min_slider_pixel = 1;
 	int max_slider_pixel = 10;
 
-	int min_slider_theta = 15;
-	int max_slider_theta = 345;
+	int min_slider_theta = 0;
+	int max_slider_theta = 315;
 
-	int min_slider_radius = (int) 1;
-	int max_slider_radius = (int) 5;
+	int min_slider_radius = 5;
+	int max_slider_radius = 20;
 
 	int min_slider_length = 4;
-	int max_slider_length = 20;
+	int max_slider_length = 10;
 
 	// SLIDER VALUE
 	int pixel_gap = 4;
@@ -106,16 +111,20 @@ public class FinalProject extends Frame {
 	public ArrayList<BrushStroke> generateStrokes(final BufferedImage src) {
 
 		final ArrayList<BrushStroke> lines = new ArrayList<BrushStroke>();
-		for (int x1 = 0; x1 < width; x1 = x1 + pixel_gap) {
-			for (int y1 = 0; y1 < height; y1 = y1 + (pixel_gap)) {
+		for (int x1 = 0; x1 < width; x1 += 2) {
+			for (int y1 = 0; y1 < height; y1 += 2) {
 				try {
 					double random_length = util.randomValueBetween(min_slider_length, max_slider_length);
 					float angle;
+					float degrees;
 					if (SET_THETA) {
-						angle = (float) Math.toRadians(theta);
+						degrees = (float) util.randomValueBetween(theta - 1, theta + 1);
+
 					} else {
-						angle = (float) Math.toRadians(util.getAngle(src, x1, y1));
+						degrees = (float) util.getAngle(src, x1, y1);
 					}
+					angle = (float) Math.toRadians(degrees);
+
 					int x2 = (int) (x1 + random_length * Math.sin(angle));
 					int y2 = (int) (y1 + random_length * Math.cos(angle));
 					Color color = new Color(image.getRGB(x2, y2));
