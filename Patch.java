@@ -41,7 +41,7 @@ public class Patch extends View{
 	}
 	
 	protected void putSample(int x, int y, int[] values) {
-		if (x >=0 && x < width && y >= 0 && y < height) {
+		if (x >= 0 && x < width && y >= 0 && y < height) {
 			super.putSample(x, y, values);
 		}
 		throw new IllegalArgumentException("Attempts to put ("+x+","+y+") from "+toString() + "is invalid.");
