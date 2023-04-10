@@ -48,13 +48,7 @@ public class SynthAide {
 		return twod;
 	    }
 
-	    /** This searches the given array for all non-negative values less than
-	     *  or equal to a given threshold and returns the list
-	     *  of array indicies of matches. Negative values are assumed
-	     *  to be invalid and thus are ignored.
-	     *  
-	     *  @return This returns a list of TwoDLoc objects.
-	     */
+	    
 	    public static LinkedList lessThanEqual(double[][] vals, double threshold) {
 
 		LinkedList list = new LinkedList();
@@ -68,12 +62,7 @@ public class SynthAide {
 		return list;
 	    }
 
-	    /** This blends the pixel values at (x,y) from the two patches and puts
-	     *  the result in toPatch.
-	     *  @param frompart This gives the ration of the fromPatch value to
-	     *                  use (0 <= frompart <= 1). The rest of the value
-	     *                  comes from toPatch.
-	     */
+	   
 	    public static void blend(Patch fromPatch, Patch toPatch, int x, int y,
 				     double frompart) {
 
@@ -88,10 +77,6 @@ public class SynthAide {
 	    }
 
 
-	    /** This computes the sum (accross channels) of squared differences
-	     *  between the pixel values at the given coordinate in the given
-	     *  views.
-	     */
 	    public static int ssd(View view1, View view2, int x, int y) {
 
 		int vals[] = view1.getSample(x, y);
