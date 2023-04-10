@@ -12,49 +12,48 @@ import java.awt.Graphics2D;
 import java.awt.Stroke;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+enum Parameter {
+	RADIUS, LENGTH, ANGLE
+}
+
 class FinalProject extends Frame {
 	private static final long serialVersionUID = 1L;
-	Util util = new Util(); // utility functions
-	List<Line2D.Double> lines; // holds the list of generated 'strokes'
 
+	Util util = new Util(); // utility functions
+
+	// image
 	BufferedImage image;
-	BufferedImage texturedImage;
-	BufferedImage quilting;
+
 	// size
 	int width;
 	int height;
 
 	// debug mode
-	boolean debugMode = true;
+	boolean debug = true;
 
 	// slider min and max
-	int minAllowedPixelInterval = 1;
-	int maxAllowedPixelInterval = 10;
-	int minAllowedStrokeRadius = 1;
-	int maxAllowedStrokeRadius = 5;
-	int minAllowedStrokeLength = 4;
-	int maxAllowedStrokeLength = 20;
-	int minAllowedStrokeAngle = 0;
-	int maxAllowedStrokeAngle = 360;
+	int min_slider_interval = 1;
+	int max_slider_interval = 10;
+	int min_slider_radius = 1;
+	int max_slider_radius = 10;
+	int min_slider_length = 1;
+	int max_slider_length = 20;
 
 	// default slider value
-	int minStrokeRadius = 1;
-	int maxStrokeRadius = 5;
-	int minStrokeLength = 4;
-	int maxStrokeLength = 20;
-	int pixelInterval = 3;
-	int minStrokeAngle = 30; // minimum stroke angle (if isOrientationByGradient is false)
-	int maxStrokeAngle = 60; // maximum stroke angle (if isOrientationByGradient is false)
+	int pixel_gap = 3;
+	int min_radius = 2;
+	int max_radius = 8;
+	int min_length = 4;
+	int max_length = 17;
 
 	public FinalProject() {
 		loadImages();
@@ -69,10 +68,9 @@ class FinalProject extends Frame {
 		});
 	}
 
-	private void loadImages() {
+	public void loadImages() {
 		try {
-			if (!debugMode) {
-				System.out.println("Debug Mode off");
+			if (!debug) {
 				JFileChooser chooser = new JFileChooser();
 				chooser.setFileFilter(new FileNameExtensionFilter("Images", "jpg", "png"));
 				int returnVal = chooser.showOpenDialog(null);
@@ -81,16 +79,14 @@ class FinalProject extends Frame {
 				} else {
 					return;
 				}
-
 			} else {
-				System.out.println("Debug Mode On");
+				System.out.println("Debug On");
 				image = ImageIO.read(new File("testImage.jpg"));
 			}
 			width = image.getWidth();
 			height = image.getHeight();
-
-		} catch (Exception e) {
-			System.out.println("Cannot load the provided image");
+		} catch (IOException e) {
+			System.err.println("Error loading image: " + e.getMessage());
 		}
 	}
 
@@ -100,52 +96,88 @@ class FinalProject extends Frame {
 	 * @param img: img to generate strokes for
 	 * @return ArrayList of line objects
 	 */
-	private ArrayList<Line> generateStrokes(final BufferedImage src) {
+	public ArrayList<BrushStroke> generateStrokes(final BufferedImage src) {
 
-		final ArrayList<Line> lines = new ArrayList<Line>();
+		final ArrayList<BrushStroke> lines = new ArrayList<BrushStroke>();
 
-		for (int i = 0; i < width; i = i + pixelInterval) {
-			for (int j = 0; j < height; j = j + pixelInterval) {
+		/**
+		 * pixel_gap a feature???
+		 */
+		for (int x1 = 0; x1 < width; x1 = x1 + pixel_gap) {
+			for (int y1 = 0; y1 < height; y1 = y1 + (pixel_gap)) {
 				try {
-					double randomStrokeLength = util.randomDoubleBetween(minStrokeLength, maxStrokeLength);
 
-					double angleInDegrees = util.getOrientationForPixel(src, i, j);
-					float angle = (float) Math.toRadians(angleInDegrees);
+					// (30*r + 59*g + 11*b)/100 from the article
+					int rgb = src.getRGB(x1, y1);
+					int newR, newG, newB, intensity;
 
-					int endPointX = (int) (i + randomStrokeLength * Math.sin(angle));
-					int endPointY = (int) (j + randomStrokeLength * Math.cos(angle));
+					newR = util.clip(util.getRed(rgb) * 30);
+					newG = util.clip(util.getGreen(rgb) * 59);
+					newB = util.clip(util.getBlue(rgb) * 11);
+					intensity = util.clip((newR + newG + newB) / 100);
 
-					Color color = new Color(image.getRGB(i, j));
-
-					lines.add(new Line(i, j, endPointX, endPointY, color));
-				} catch (final Exception e) {
-					System.out.println(e);
+					double random_length = util.randomDoubleBetween(min_length, max_length);
+					/**
+					 * not sure what's going on with the angles. just playing around with the
+					 * intensity formula I found on the paper
+					 * 
+					 */
+					/**
+					 * TODO: MAYBE GIVE FEW OPTIONS FOR SEVERAL ANGLES AS UI CONTROL OR RANDOMNESS?
+					 */
+					float angle = (float) Math.toRadians((x1 / intensity) * random_length);
+					int x2 = (int) (x1 + random_length * Math.sin(angle));
+					/**
+					 * TODO: not sure why sin on y2 just creates strai
+					 */
+					int y2 = (int) (y1 + random_length * Math.cos(angle));
+					Color color = new Color(image.getRGB(x2, y2));
+					System.out.println(angle);
+					lines.add(new BrushStroke(x1, y1, x2, y2, color));
+				} catch (Exception e) {
+					System.out.println("Error:" + e);
 				}
 			}
 		}
 		return lines;
 	}
 
-	private void drawLines(final ArrayList<Line> lines, final Graphics g) {
+	public void drawLines(final ArrayList<BrushStroke> lines, final Graphics g) {
 		final Graphics2D g2 = (Graphics2D) g;
-		for (Line line : lines) {
-			final int strokeRadius = (int) util.randomDoubleBetween(minStrokeRadius, maxStrokeRadius);
-			final Stroke stroke = new BasicStroke(strokeRadius, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
+		for (BrushStroke line : lines) {
+			int strokeRadius = (int) util.randomDoubleBetween(min_radius, max_radius);
+			/**
+			 * TODO: MAYBE HAVE THE STROKE ENDPOINT TO BE UI CONTROLLED??
+			 */
+			System.out.println("x1:" + line.x1);
+			System.out.println("y1:" + line.y1);
+			System.out.println("x2:" + line.x2);
+			System.out.println("y2:" + line.y2);
+			System.out.println("color:" + line.color);
+
+			Stroke stroke = new BasicStroke(strokeRadius, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
 			g2.setColor(line.color);
 			g2.setStroke(stroke);
 			g2.drawLine(line.x1, line.y1, line.x2, line.y2);
 		}
 	}
 
-	public void setRange(Parameter param, int min, int max) {
+	/**
+	 * TODO: add angle?
+	 * 
+	 * @param param
+	 * @param min
+	 * @param max
+	 */
+	public void min_max(Parameter param, int min, int max) {
 		switch (param) {
-		case radius -> {
-			minStrokeRadius = min;
-			maxStrokeRadius = max;
+		case RADIUS -> {
+			min_radius = min;
+			max_radius = max;
 		}
-		case length -> {
-			minStrokeLength = min;
-			maxStrokeLength = max;
+		case LENGTH -> {
+			min_length = min;
+			max_length = max;
 		}
 		default -> throw new IllegalArgumentException("Invalid parameter: " + param);
 		}
@@ -153,15 +185,15 @@ class FinalProject extends Frame {
 	}
 
 	public void paint(Graphics g) {
-		final ArrayList<Line> lines = generateStrokes(image);
-		Util.shuffle(lines);
+		final ArrayList<BrushStroke> lines = generateStrokes(image);
 		drawLines(lines, g);
 		setSize(width, height);
 	}
 
 	public static void main(String[] args) {
-		FinalProject img = new FinalProject();
-		img.repaint();
+		FinalProject finalProject = new FinalProject();
+		return;
+////		img.repaint();
 	}
 
 }
