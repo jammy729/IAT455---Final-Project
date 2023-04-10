@@ -48,13 +48,14 @@ public class FinalProject extends Frame {
 	int height;
 
 	// OPTIONS
-	boolean DEBUG = true;
+	boolean DEBUG = false;
 	boolean SET_THETA = true;
 	boolean ANGLE_RANGE = false;
+	boolean ORIENTATION = false;
 
 	// SLIDER MIN AND MAX
-	int min_slider_pixel = 1;
-	int max_slider_pixel = 10;
+	int min_slider_pixel = 4;
+	int max_slider_pixel = 20;
 
 	int min_slider_theta = 0;
 	int max_slider_theta = 315;
@@ -63,14 +64,14 @@ public class FinalProject extends Frame {
 	int max_slider_radius = 20;
 
 	int min_slider_length = 4;
-	int max_slider_length = 10;
+	int max_slider_length = 30;
 
 	// SLIDER VALUE
-	int pixel_gap = 4;
+	int pixel_gap = 7;
 	int theta = 45; // angle
 
 	public FinalProject() {
-		loadImages();
+		loadImage();
 		this.setTitle("Final Project - Impressionist Effect with Image Quilting technique");
 		this.setVisible(true);
 		RangeSliderWindow gui = new RangeSliderWindow(this);
@@ -82,7 +83,7 @@ public class FinalProject extends Frame {
 		});
 	}
 
-	public void loadImages() {
+	public void loadImage() {
 		try {
 			if (!DEBUG) {
 				fc.setFileFilter(new FileNameExtensionFilter("Images", "jpg", "png"));
@@ -110,39 +111,39 @@ public class FinalProject extends Frame {
 	 * @return ArrayList of line objects
 	 */
 	public ArrayList<BrushStroke> generateStrokes(final BufferedImage src) {
-
 		final ArrayList<BrushStroke> lines = new ArrayList<BrushStroke>();
-		for (int x1 = 0; x1 < width; x1 += 2) {
-			for (int y1 = 0; y1 < height; y1 += 2) {
+		for (int x1 = 0; x1 < width; x1 += pixel_gap) {
+			for (int y1 = 0; y1 < height; y1 += pixel_gap) {
 				try {
 					double random_length = util.randomValueBetween(min_slider_length, max_slider_length);
 					float angle;
 					float degrees;
 					if (SET_THETA && !ANGLE_RANGE) {
 						// user choose angle
-						degrees = (float) Math.toRadians(theta);
-						System.out.println("Set Angle: " + theta);
-
+						degrees = theta;
+//						System.out.println("Set Angle: " + theta);
 					} else if (!SET_THETA && ANGLE_RANGE) {
 						// user change a min and max angle
 						degrees = (float) util.randomValueBetween(min_slider_theta, max_slider_theta);
-						System.out.println("Angle Range: " + degrees);
-
-					} else {
+//						System.out.println("Angle Range: " + degrees);
+					} else if (ORIENTATION) {
 						// random angle
-						degrees = (float) util.getAngle(src, x1, y1);
-						System.out.println("Random Angle: " + degrees);
-
+						degrees = (float) getAngle(src, x1, y1);
+//						System.out.println("Random Angle: " + degrees);(float) util.randomValueBetween(min_slider_theta, max_slider_theta);
+					} else {
+						return lines;
 					}
 					angle = (float) Math.toRadians(degrees);
 
+					// opposite = hypotenuse * sine(angle)
 					int x2 = (int) (x1 + random_length * Math.sin(angle));
+					// adhacebt = hypotenuse * cosine(angle)
 					int y2 = (int) (y1 + random_length * Math.cos(angle));
 					Color color = new Color(image.getRGB(x2, y2));
 
 					lines.add(new BrushStroke(x1, y1, x2, y2, color));
 				} catch (Exception e) {
-					System.out.println("Error:" + e);
+					System.out.println("Error:" + e.getMessage());
 				}
 			}
 		}
@@ -153,7 +154,6 @@ public class FinalProject extends Frame {
 		final Graphics2D g2 = (Graphics2D) g;
 		for (BrushStroke line : lines) {
 			int radius = (int) util.randomValueBetween(min_slider_radius, max_slider_radius);
-
 			Stroke stroke = new BasicStroke(radius, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
 			g2.setColor(line.color);
 			g2.setStroke(stroke);
@@ -178,6 +178,65 @@ public class FinalProject extends Frame {
 		default -> throw new IllegalArgumentException("Invalid Parameter: " + param);
 		}
 		repaint();
+	}
+
+	/**
+	 * https://www.compuphase.com/cmetric.htm Colour distance function given
+	 * Calculate the color distance between two given colors
+	 * 
+	 * @param color1: the first color
+	 * @param color2: the second color
+	 * 
+	 * @return: distance between two colors
+	 */
+	double colorDistance(Color color1, Color color2) {
+		// calculate the difference
+		int redDiff = color1.getRed() - color2.getRed();
+		int greenDiff = color1.getGreen() - color2.getGreen();
+		int blueDiff = color1.getBlue() - color2.getBlue();
+
+		// mean level of red
+		int redMean = (color1.getRed() + color2.getRed()) / 2;
+
+		// formula
+		int rMeanFactor = 512 + redMean;
+		int rSquared = redDiff * redDiff;
+		int gSquared = greenDiff * greenDiff;
+		int bSquared = blueDiff * blueDiff;
+		int bMeanFactor = 767 - redMean;
+
+		return Math.sqrt((((rMeanFactor) * rSquared) >> 8) + 4 * gSquared + (((bMeanFactor) * bSquared) >> 8));
+	}
+
+	public double getAngle(BufferedImage src, int x, int y) {
+		int[][] surroundingPixels = new int[][] { { x - 1, y - 1 }, { x, y - 1 }, { x + 1, y - 1 }, { x - 1, y },
+				{ x + 1, y }, { x - 1, y + 1 }, { x, y + 1 }, { x + 1, y + 1 } };
+
+		Color pixelColor = new Color(src.getRGB(x, y));
+		double lowestDistance = Double.MAX_VALUE;
+		int closestPixelIndex = -1;
+
+		for (int i = 0; i < surroundingPixels.length; i++) {
+			int[] pixelPos = surroundingPixels[i];
+			Color color = new Color(src.getRGB(pixelPos[0], pixelPos[1]));
+			double distance = colorDistance(pixelColor, color);
+			// keeps track of the surrounding pixel with the closest to the current pixel
+			if (distance < lowestDistance) {
+				lowestDistance = distance;
+				closestPixelIndex = i;
+			}
+		}
+		System.out.println(angle(closestPixelIndex));
+		return angle(closestPixelIndex);
+	}
+
+	private static final double[] ANGLES = { 0, 45, 90, 135, 180, 225, 270, 315 };
+
+	public double angle(int closestPixelIndex) {
+		if (closestPixelIndex < 0 || closestPixelIndex >= ANGLES.length) {
+			return 0;
+		}
+		return ANGLES[closestPixelIndex];
 	}
 
 	public void paint(Graphics g) {

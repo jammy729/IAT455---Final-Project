@@ -1,6 +1,7 @@
 
 /**
  * Ernie Yu - Github
+ * https://github.com/ernieyu/Swing-range-slider
  * 
  */
 
