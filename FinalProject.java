@@ -32,7 +32,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 // TODO: 2. BRUSH LENGTH IN THE RANGE [4, 10]
 // TODO: 3. HAVE CONSTRAINTS TO PREVENT LARGE BRUSH STROKES DOMINATING THE IMAGE
 enum Parameter {
-	RADIUS, LENGTH, ANGLE
+	RADIUS, LENGTH, THETA_RANGE
 }
 
 public class FinalProject extends Frame {
@@ -50,6 +50,7 @@ public class FinalProject extends Frame {
 	// OPTIONS
 	boolean DEBUG = true;
 	boolean SET_THETA = true;
+	boolean ANGLE_RANGE = false;
 
 	// SLIDER MIN AND MAX
 	int min_slider_pixel = 1;
@@ -117,11 +118,21 @@ public class FinalProject extends Frame {
 					double random_length = util.randomValueBetween(min_slider_length, max_slider_length);
 					float angle;
 					float degrees;
-					if (SET_THETA) {
-						degrees = (float) util.randomValueBetween(theta - 1, theta + 1);
+					if (SET_THETA && !ANGLE_RANGE) {
+						// user choose angle
+						degrees = (float) Math.toRadians(theta);
+						System.out.println("Set Angle: " + theta);
+
+					} else if (!SET_THETA && ANGLE_RANGE) {
+						// user change a min and max angle
+						degrees = (float) util.randomValueBetween(min_slider_theta, max_slider_theta);
+						System.out.println("Angle Range: " + degrees);
 
 					} else {
+						// random angle
 						degrees = (float) util.getAngle(src, x1, y1);
+						System.out.println("Random Angle: " + degrees);
+
 					}
 					angle = (float) Math.toRadians(degrees);
 
@@ -160,7 +171,11 @@ public class FinalProject extends Frame {
 			min_slider_length = min;
 			max_slider_length = max;
 		}
-		default -> throw new IllegalArgumentException("Invalid parameter: " + param);
+		case THETA_RANGE -> {
+			min_slider_theta = min;
+			max_slider_theta = max;
+		}
+		default -> throw new IllegalArgumentException("Invalid Parameter: " + param);
 		}
 		repaint();
 	}
